@@ -7,12 +7,15 @@ import wandb
 import numpy as np
 
 
+os.environ["WANDB_MODE"] = "offline"
+
+
 class ProteinDataset(Dataset):
     def __init__(self, file, tokenizer):
         data = pd.read_csv(file)
         self.tokenizer = tokenizer
         self.proteins = data["Receptor Sequence"].tolist()
-        self.peptides = data["Binder"].tolist()
+        self.peptides = data["Sequence"].tolist()
 
     def __len__(self):
         return len(self.proteins)
@@ -57,13 +60,13 @@ training_args = TrainingArguments(
     evaluation_strategy="epoch",
     load_best_model_at_end=True,
     save_strategy='epoch',
-    metric_for_best_model='eval/loss',
+    metric_for_best_model='loss',
     save_total_limit = 5,
     gradient_accumulation_steps=2
 )
 
-train_dataset = ProteinDataset("train.csv", tokenizer)
-test_dataset = ProteinDataset("test.csv", tokenizer)
+train_dataset = ProteinDataset("./data/train.csv", tokenizer)
+test_dataset = ProteinDataset("./data/val.csv", tokenizer)
 
 
 trainer = Trainer(
